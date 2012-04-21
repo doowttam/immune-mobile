@@ -28,7 +28,7 @@ class Immune
     @resetCanvas()
 
     @drawBullets()
-    damage = @drawGerms()
+    damage = @drawGerms(@bullets)
 
     if damage
       @context.fillStyle = 'red'
@@ -44,7 +44,7 @@ class Immune
       randX = Math.ceil Math.random() * @canvas.width
       @germs.push( new Germ randX, 0 );
 
-  drawGerms: ->
+  drawGerms: (bullets) ->
     toCleanUp = [];
     damage    = false
 
@@ -53,9 +53,13 @@ class Immune
         germ = @germs[germIndex]
         germ.move(@context)
         germ.draw(@context)
-        if germ.isOffscreen(@canvas)
+
+        if germ.isHit(bullets)
+          toCleanUp.push germIndex
+        else if germ.isOffscreen(@canvas)
           damage = true
           toCleanUp.push germIndex
+
 
       for germIndex in toCleanUp
         @germs.splice germIndex, 1
@@ -125,6 +129,13 @@ class Germ
 
   isOffscreen: (canvas) -> if @y > canvas.height then true else false
 
+  isHit: (bullets) ->
+    for bullet in bullets
+      if ( @x <= bullet.x + bullet.width and
+           @x + @width >= bullet.x and
+           @y <= bullet.y + bullet.height and
+           @y + @height >= bullet.y )
+        return true
 
 class Defender
   constructor: (@x, @y) ->
