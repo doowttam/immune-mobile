@@ -5,7 +5,10 @@ class Immune
     @buttons =
       start: @doc.getElementById("start")
       pause: @doc.getElementById("pause")
+
+    # Entities
     @bullets = [];
+    @germs   = [];
 
     @buttons.start.onclick = @play
     @buttons.pause.onclick = @pause
@@ -25,8 +28,39 @@ class Immune
     @resetCanvas()
 
     @drawBullets()
+    damage = @drawGerms()
+
+    if damage
+      @context.fillStyle = 'red'
+      @context.fillRect 0, 0, @canvas.width, @canvas.height
+
     @defender.move(@canvas, @key, @bullets);
     @defender.draw(@context);
+
+    @spawnGerms()
+
+  spawnGerms: ->
+    if Math.random() < 0.01
+      randX = Math.ceil Math.random() * @canvas.width
+      @germs.push( new Germ randX, 0 );
+
+  drawGerms: ->
+    toCleanUp = [];
+    damage    = false
+
+    if @germs.length > 0
+      for germIndex in [ 0 .. @germs.length - 1 ]
+        germ = @germs[germIndex]
+        germ.move(@context)
+        germ.draw(@context)
+        if germ.isOffscreen(@canvas)
+          damage = true
+          toCleanUp.push germIndex
+
+      for germIndex in toCleanUp
+        @germs.splice germIndex, 1
+
+    return damage
 
   drawBullets: ->
     toCleanUp = [];
@@ -76,6 +110,22 @@ class Key
   onKeyUp: (event) =>
     delete @pressed[event.keyCode]
 
+class Germ
+  constructor: (@x, @y) ->
+    @speed = 1
+    @width = 10
+    @height = 10
+
+  draw: (context)->
+    context.fillStyle = 'green'
+    context.fillRect @x, @y, @width, @height
+
+  move: ->
+    @y = @y + @speed;
+
+  isOffscreen: (canvas) -> if @y > canvas.height then true else false
+
+
 class Defender
   constructor: (@x, @y) ->
     @speed  = 2
@@ -83,6 +133,7 @@ class Defender
     @height = 10
 
   draw: (context)->
+    context.fillStyle = 'black'
     context.fillRect @x, @y, @width, @height
     context.fillStyle = 'red'
     context.fillRect @x + @width / 4, @y - @height / 2, @width / 2, @height / 2
@@ -102,7 +153,7 @@ class Bullet
   constructor: (@x, @y) ->
     @speed = 3
     @width = 4
-    @height = 5
+    @height = 4
 
   draw: (context)->
     context.fillRect @x - @width / 2, @y, @width, @height
