@@ -92,7 +92,10 @@ class Immune
   spawnGerms: ->
     if Math.random() < 0.01
       randX = Math.ceil Math.random() * @canvas.width
-      @germs.push( new Germ randX, 0 );
+      if Math.random() < 0.7
+        @germs.push( new Germ randX, 0 );
+      else
+        @germs.push( new GiantGerm randX, 0 );
 
   spawnPowerUps: ->
     if Math.random() < 0.005
@@ -112,15 +115,19 @@ class Immune
         bulletHit  = germ.isHit(bullets)
         powerUpHit = germ.isHit(powerups)
         if bulletHit.hit
-          toCleanUp.push germIndex
           if bulletHit.absorb
+            germ.health = 0
             @status.sickness = @status.sickness + germ.damage
             damage = true
           else
+            germ.health--
             @status.score++
+
+          toCleanUp.push germIndex if germ.health < 1
+
         else if powerUpHit.hit
           toCleanUp.push germIndex
-          powerUpHit.item.takeDamage()
+          powerUpHit.item.takeDamage(germ.damage)
         else if germ.isOffscreen(@canvas)
           @status.sickness = @status.sickness + germ.damage
           damage = true
@@ -219,6 +226,7 @@ class Germ
     @width = 10
     @height = 10
     @damage = 20
+    @health = 1
 
   draw: (context)->
     context.fillStyle = 'green'
@@ -238,9 +246,20 @@ class Germ
         return { hit: true, absorb: item.absorb, item: item }
     return { hit: false }
 
+class GiantGerm extends Germ
+  constructor: (@x, @y) ->
+    @speed = 1
+    @width = 20
+    @height = 20
+    @damage = 60
+    @health = 30
+
 class PowerUp extends Germ
   constructor: (@x, @y) ->
-    super @x, @y
+    @speed = 1
+    @width = 10
+    @height = 10
+    @damage = 20
 
     if Math.random() < 0.5
       @type = 'freeze'
@@ -270,10 +289,10 @@ class PowerUp extends Germ
     else
       @width = canvas.width
       @x = 0
-      @health = 3
+      @health = 60
 
-  takeDamage: ->
-    @health--
+  takeDamage: (damage) ->
+    @health = @health - damage
     @height = @height - 2
 
   draw: (context) ->
