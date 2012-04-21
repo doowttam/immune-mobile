@@ -99,7 +99,7 @@ class Immune
           toCleanUp.push germIndex
           @status.score++
         else if germ.isOffscreen(@canvas)
-          @status.sickness++
+          @status.sickness = @status.sickness + 20
           damage = true
           toCleanUp.push germIndex
 
