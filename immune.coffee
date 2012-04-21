@@ -7,8 +7,13 @@ class Immune
       pause: @doc.getElementById("pause")
 
     # Entities
-    @bullets = [];
-    @germs   = [];
+    @bullets = []
+    @germs   = []
+
+    # Status
+    @status =
+      sickness: 0
+      score   : 0
 
     @buttons.start.onclick = @play
     @buttons.pause.onclick = @pause
@@ -19,7 +24,7 @@ class Immune
     @win.onkeydown = (e) =>
       @key.onKeyDown e
 
-    @defender = new Defender( @canvas.width / 2, @canvas.height - 50 );
+    @defender = new Defender( @canvas.width / 2, @canvas.height - 50 )
 
   resetCanvas: ->
     @canvas.width = @canvas.width
@@ -30,14 +35,50 @@ class Immune
     @drawBullets()
     damage = @drawGerms(@bullets)
 
-    if damage
+    @defender.move(@canvas, @key, @bullets)
+    @defender.draw(@context)
+
+    @spawnGerms()
+
+    @drawStatus()
+
+    if @status.sickness > 99
+      @gameOver()
+    else if damage
       @context.fillStyle = 'red'
       @context.fillRect 0, 0, @canvas.width, @canvas.height
 
-    @defender.move(@canvas, @key, @bullets);
-    @defender.draw(@context);
+  gameOver: ->
+    @pause()
+    @context.fillStyle = 'rgba(0,0,0,.7)'
+    @context.fillRect 0, 0, @canvas.width, @canvas.height
 
-    @spawnGerms()
+    @context.fillStyle = 'white'
+    @context.font = 'bold 48px sans-serif'
+    @context.textAlign = 'center'
+    @context.fillText "You got sick!", @canvas.width / 2, 125
+
+    @context.fillStyle = 'white'
+    @context.font = 'bold 36px sans-serif'
+    @context.textAlign = 'center'
+    @context.fillText "Score: " + @status.score, @canvas.width / 2, 200
+
+  drawStatus: ->
+    @context.fillStyle = 'rgba(0,0,0,.5)'
+    @context.fillRect 0, 25, 75, 24
+
+    @context.fillStyle = 'white'
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'left'
+    @context.fillText "Score: " + @status.score, 5, 42
+
+    @context.fillStyle = 'rgba(0,0,0,.5)'
+    @context.fillRect @canvas.width, 25, -100, 24
+
+    @context.fillStyle = 'white'
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'right'
+    @context.fillText 'Sickness: ' + @status.sickness + '%', @canvas.width - 5, 42
 
   spawnGerms: ->
     if Math.random() < 0.01
@@ -56,7 +97,9 @@ class Immune
 
         if germ.isHit(bullets)
           toCleanUp.push germIndex
+          @status.score++
         else if germ.isOffscreen(@canvas)
+          @status.sickness++
           damage = true
           toCleanUp.push germIndex
 
