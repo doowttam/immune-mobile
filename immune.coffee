@@ -95,11 +95,15 @@ class Immune
         germ.move(@context)
         germ.draw(@context)
 
-        if germ.isHit(bullets)
+        germHit = germ.isHit(bullets)
+        if germHit.hit
           toCleanUp.push germIndex
-          @status.score++
+          if germHit.absorb
+            @status.sickness = @status.sickness + germ.damage
+          else
+            @status.score++
         else if germ.isOffscreen(@canvas)
-          @status.sickness = @status.sickness + 20
+          @status.sickness = @status.sickness + germ.damage
           damage = true
           toCleanUp.push germIndex
 
@@ -162,6 +166,7 @@ class Germ
     @speed = 1
     @width = 10
     @height = 10
+    @damage = 20
 
   draw: (context)->
     context.fillStyle = 'green'
@@ -178,7 +183,8 @@ class Germ
            @x + @width >= bullet.x and
            @y <= bullet.y + bullet.height and
            @y + @height >= bullet.y )
-        return true
+        return { hit: true, absorb: bullet.absorb }
+    return { hit: false }
 
 class Defender
   constructor: (@x, @y) ->
@@ -199,9 +205,15 @@ class Defender
       @x = @x + @speed
     if key.isDown(key.codes.UP)
       @fire(bullets)
+    if key.isDown(key.codes.DOWN)
+      @absorb(bullets)
+
 
   fire: (bullets) ->
     bullets.push(new Bullet @x + @width / 2, @y)
+
+  absorb: (bullets) ->
+    bullets.push(new AbsorbBullet @x + @width / 2, @y)
 
 class Bullet
   constructor: (@x, @y) ->
@@ -210,12 +222,20 @@ class Bullet
     @height = 4
 
   draw: (context)->
+    context.fillStyle = 'black'
     context.fillRect @x - @width / 2, @y, @width, @height
 
   move: ->
     @y = @y - @speed;
 
   isOffscreen: -> if @y < 0 then true else false
+
+class AbsorbBullet extends Bullet
+  absorb: true
+
+  draw: (context)->
+    context.fillStyle = 'orange'
+    context.fillRect @x - @width / 2, @y, @width, @height
 
 window.onload = ->
   immune = new Immune window.document, window
