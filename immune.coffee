@@ -16,6 +16,7 @@ class Immune
     @status =
       sickness: 0
       score   : 0
+      freeze: false
 
     @buttons.start.onclick = @play
     @buttons.pause.onclick = @pause
@@ -42,8 +43,9 @@ class Immune
     @defender.move(@canvas, @key, @bullets)
     @defender.draw(@context)
 
-    @spawnGerms()
-    @spawnPowerUps()
+    if !@status.freeze
+      @spawnGerms()
+      @spawnPowerUps()
 
     @drawStatus()
 
@@ -102,7 +104,7 @@ class Immune
     if @germs.length > 0
       for germIndex in [ 0 .. @germs.length - 1 ]
         germ = @germs[germIndex]
-        germ.move(@context)
+        germ.move(@context) if !@status.freeze
         germ.draw(@context)
 
         bulletHit  = germ.isHit(bullets)
@@ -140,7 +142,7 @@ class Immune
         if powerupHit.hit
           toCleanUp.push powerupIndex
           if powerupHit.absorb
-            powerup.activate(@canvas)
+            powerup.activate(@canvas, @status)
             @activePowerUps.push powerup
         else if powerup.isOffscreen(@canvas)
           toCleanUp.push powerupIndex
@@ -235,17 +237,35 @@ class Germ
     return { hit: false }
 
 class PowerUp extends Germ
-  activate: (canvas) ->
-    @width = canvas.width
-    @x = 0
-    @health = 3
+  constructor: (@x, @y) ->
+    super @x, @y
+
+    if Math.random() < 0.5
+      @type = 'freeze'
+    else
+      @type = 'shield'
+
+  activate: (canvas, status) ->
+    if @type == 'freeze'
+      status.freeze = true
+      setTimeout =>
+        status.freeze = false
+        @health = 0
+      , 3000
+    else
+      @width = canvas.width
+      @x = 0
+      @health = 3
 
   takeDamage: ->
     @health--
     @height = @height - 2
 
   draw: (context) ->
-    context.fillStyle = 'blue'
+    if @type == 'shield'
+      context.fillStyle = 'blue'
+    else
+      context.fillStyle = 'purple'
     context.fillRect @x, @y, @width, @height
 
 class Defender
