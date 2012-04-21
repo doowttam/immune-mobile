@@ -17,6 +17,8 @@ class Immune
       sickness: 0
       score   : 0
       freeze: false
+      activeFreezePowerUp: null
+
 
     @buttons.start.onclick = @play
     @buttons.pause.onclick = @pause
@@ -245,13 +247,26 @@ class PowerUp extends Germ
     else
       @type = 'shield'
 
+  freezeTimeout: null
+
+  cancelFreeze: ->
+    clearTimeout @freezeTimeout
+    @health = 0
+
   activate: (canvas, status) ->
     if @type == 'freeze'
       status.freeze = true
-      setTimeout =>
-        status.freeze = false
-        @health = 0
-      , 3000
+
+      if status.activeFreezePowerUp
+        status.activeFreezePowerUp.cancelFreeze()
+
+      status.activeFreezePowerUp = @
+      @freezeTimeout =
+        setTimeout =>
+          status.freeze = false
+          status.activeFreezePowerUp = null
+          @health = 0
+        , 3000
     else
       @width = canvas.width
       @x = 0
