@@ -5,6 +5,7 @@ class Immune
     @buttons =
       start: @doc.getElementById("start")
       pause: @doc.getElementById("pause")
+    @bullets = [];
 
     @buttons.start.onclick = @play
     @buttons.pause.onclick = @pause
@@ -23,8 +24,23 @@ class Immune
   drawFrame: ->
     @resetCanvas()
 
-    @defender.move(@canvas, @key);
+    @drawBullets()
+    @defender.move(@canvas, @key, @bullets);
     @defender.draw(@context);
+
+  drawBullets: ->
+    toCleanUp = [];
+
+    if @bullets.length > 0
+      for bulletIndex in [ 0 .. @bullets.length - 1 ]
+        bullet = @bullets[bulletIndex]
+        bullet.move(@context)
+        bullet.draw(@context)
+        if bullet.isOffscreen()
+          toCleanUp.push bulletIndex
+
+      for bulletIndex in toCleanUp
+        @bullets.splice bulletIndex, 1
 
   play: =>
     return if @frameInterval
@@ -71,11 +87,30 @@ class Defender
     context.fillStyle = 'red'
     context.fillRect @x + @width / 4, @y - @height / 2, @width / 2, @height / 2
 
-  move: (canvas, key) ->
+  move: (canvas, key, bullets) ->
     if key.isDown(key.codes.LEFT) and @x - @speed >= 0
       @x = @x - @speed
     if key.isDown(key.codes.RIGHT) and @x + @speed <= canvas.width - @width
       @x = @x + @speed
+    if key.isDown(key.codes.UP)
+      @fire(bullets)
+
+  fire: (bullets) ->
+    bullets.push(new Bullet @x + @width / 2, @y)
+
+class Bullet
+  constructor: (@x, @y) ->
+    @speed = 3
+    @width = 4
+    @height = 5
+
+  draw: (context)->
+    context.fillRect @x - @width / 2, @y, @width, @height
+
+  move: ->
+    @y = @y - @speed;
+
+  isOffscreen: -> if @y < 0 then true else false
 
 window.onload = ->
   immune = new Immune window.document, window
