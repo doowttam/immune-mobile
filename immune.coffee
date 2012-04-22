@@ -320,11 +320,11 @@ class Germ
 
 class GiantGerm extends Germ
   constructor: (@x, @y) ->
-    @speed = 1
+    @speed = 0.5
     @width = 20
     @height = 20
     @damage = 60
-    @health = @baseHealth = 30
+    @health = @baseHealth = 15
 
   draw: (context, resource)->
     offset = if @frame <= 4 then 1 else 0
@@ -388,6 +388,7 @@ class Defender
     @speed  = 2
     @width  = 24
     @height = 10
+    @cooldown = false
 
   draw: (context)->
     context.fillStyle = 'black'
@@ -406,16 +407,26 @@ class Defender
       @absorb(bullets)
 
   fire: (bullets) ->
+    return if @cooldown
     bullets.push(new Bullet @x + @width / 2, @y)
+    @cooldown = true
+    setTimeout =>
+      @cooldown = false
+    , 100
 
   absorb: (bullets) ->
+    return if @cooldown
     bullets.push(new AbsorbBullet @x + @width / 2, @y)
+    @cooldown = true
+    setTimeout =>
+      @cooldown = false
+    , 100
 
 class Bullet
   constructor: (@x, @y) ->
     @speed = 3
     @width = 4
-    @height = 4
+    @height = 10
     @hitSomething = false
 
   draw: (context)->
