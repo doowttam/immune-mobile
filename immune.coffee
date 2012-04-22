@@ -182,10 +182,13 @@ class Immune
   spawnPowerUps: ->
     if Math.random() < 0.005
       randX = Math.ceil (Math.random() * (@canvas.width - 100)) + 50
-      if Math.random() < 0.5
+      spawnType = Math.random()
+      if spawnType < 0.4
         @powerups.push( new FreezeBomb randX, 0 );
-      else
+      else if spawnType < 0.7
         @powerups.push( new Shield randX, 0 );
+      else
+        @powerups.push( new Vitamin randX, 0 );
 
   drawGerms: (bullets, powerups, resource) ->
     toCleanUp = [];
@@ -379,6 +382,16 @@ class Shield extends PowerUp
     @width = canvas.width
     @x = 0
     @health = 60
+
+class Vitamin extends PowerUp
+  color: 'red'
+  healing: 10
+
+  activate: (canvas, status, resource) ->
+    resource['sfx/powerup.ogg'].play()
+    if status.sickness > @healing
+      status.sickness = status.sickness - @healing
+    @health = 0
 
 class FreezeBomb extends PowerUp
   freezeTimeout: null
