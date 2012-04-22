@@ -173,7 +173,7 @@ class Immune
 
   spawnGerms: ->
     if Math.random() < 0.01
-      randX = Math.ceil Math.random() * @canvas.width
+      randX = Math.ceil (Math.random() * (@canvas.width - 100)) + 50
       if Math.random() < 0.7
         @germs.push( new Germ randX, 0 );
       else
@@ -181,7 +181,7 @@ class Immune
 
   spawnPowerUps: ->
     if Math.random() < 0.005
-      randX = Math.ceil Math.random() * @canvas.width
+      randX = Math.ceil (Math.random() * (@canvas.width - 100)) + 50
       if Math.random() < 0.5
         @powerups.push( new FreezeBomb randX, 0 );
       else
