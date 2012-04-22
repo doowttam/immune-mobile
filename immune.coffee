@@ -343,6 +343,8 @@ class Immune
           if powerupHit.absorb
             powerup.activate(@canvas, @status, resource)
             @activePowerUps.push powerup
+          else
+            resource['sfx/explode.ogg'].play()
         else if powerup.isOffscreen(@canvas)
           toCleanUp.push powerupIndex
 
