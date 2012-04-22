@@ -20,6 +20,7 @@ class Immune
       score   : 0
       freeze: false
       activeFreezePowerUp: null
+      frame: 0
 
     @buttons.start.onclick = @play
     @buttons.pause.onclick = @pause
@@ -204,6 +205,8 @@ class Immune
   drawFrame: ->
     @resetCanvas()
 
+    @status.frame++
+
     @context.drawImage @resource['img/bg.png'], 0, 0
 
     damage = @drawGerms(@bullets, @activePowerUps, @resource)
@@ -273,9 +276,9 @@ class Immune
     @context.fillText 'Sickness: ' + @status.sickness + '%', @canvas.width - 5, 42
 
   spawnGerms: ->
-    if Math.random() < 0.01
+    if Math.random() < 0.02
       randX = Math.ceil (Math.random() * (@canvas.width - 100)) + 50
-      if Math.random() < 0.9
+      if Math.random() < 0.8 and @status.frame < 3500
         @germs.push( new Germ randX, 0 );
       else
         @germs.push( new GiantGerm randX, 0 );
