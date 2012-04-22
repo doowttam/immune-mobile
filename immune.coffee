@@ -295,7 +295,7 @@ class Germ
     @width  = 10
     @height = 10
     @damage = 20
-    @health = 1
+    @health = @baseHealth = 1
     @frame  = 0
 
   draw: (context, resource)->
@@ -323,7 +323,16 @@ class GiantGerm extends Germ
     @width = 20
     @height = 20
     @damage = 60
-    @health = 30
+    @health = @baseHealth = 30
+
+  draw: (context, resource)->
+    offset = if @frame <= 4 then 1 else 0
+    context.drawImage resource['img/germ.png'], 20 * offset, 0, 20 , 20, @x, @y, @width, @height
+    context.fillStyle = 'red'
+    if @health < @baseHealth
+      healthWidth = @width * @health / @baseHealth
+      context.fillRect @x, @y, healthWidth, 5
+
 
 class PowerUp extends Germ
   constructor: (@x, @y) ->
