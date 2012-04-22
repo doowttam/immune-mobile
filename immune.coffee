@@ -467,7 +467,7 @@ class PowerUp extends Germ
     @speed = 1
     @width = 10
     @height = 10
-    @damage = 20
+    @damage = 15
 
   takeDamage: (damage) ->
     @health = @health - damage
@@ -484,7 +484,7 @@ class Shield extends PowerUp
     resource['sfx/powerup.ogg'].play()
     @width = canvas.width
     @x = 0
-    @health = 60
+    @health = 15
 
   draw: (context, resource)->
     offset = if @frame <= 4 then 1 else 0
