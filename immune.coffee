@@ -102,13 +102,95 @@ class Immune
 
   showTitleScreen: ->
     @resetCanvas();
+
+    @context.drawImage @resource['img/bg.png'], 0, 0
     @context.fillStyle = 'rgba(0,0,0,.7)'
     @context.fillRect 0, 0, @canvas.width, @canvas.height
 
-    @context.fillStyle = 'black'
-    @context.font = 'bold 48px sans-serif'
+    @context.fillStyle = 'white'
+    @context.font = 'bold 36px sans-serif'
+    @context.textAlign = 'left'
+    @context.fillText "Immune", 250, 60
+
+    @context.font = 'bold 16px sans-serif'
     @context.textAlign = 'center'
-    @context.fillText "Immune", @canvas.width / 2, 125
+    @context.fillText "You're the defense!", 130, 50
+
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'right'
+    @context.fillText "You", 130, 70
+
+    @context.drawImage @resource['img/defender.png'], 140, 60
+
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'right'
+    @context.fillText "Attack Ray", 130, 90
+
+    @context.fillStyle = 'black'
+    @context.fillRect 150, 82, 4, 10
+
+    @context.fillStyle = 'white'
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'right'
+    @context.fillText "Absorption Ray", 130, 110
+
+    @context.fillStyle = 'orange'
+    @context.fillRect 150, 102, 4, 10
+
+    @context.fillStyle = 'white'
+    @context.font = 'bold 16px sans-serif'
+    @context.textAlign = 'center'
+    @context.fillText "Destroy the germs!", 130, 150
+
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'right'
+    @context.fillText "Germ", 130, 170
+
+    @context.drawImage @resource['img/germ.png'], 0, 0, 10 , 10, 140, 160, 10, 10
+
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'right'
+    @context.fillText "Super Germ", 130, 190
+
+    @context.drawImage @resource['img/giant_germ.png'], 0, 0, 20 , 20, 140, 180, 20, 20
+
+    @context.fillStyle = 'white'
+    @context.font = 'bold 16px sans-serif'
+    @context.textAlign = 'center'
+    @context.fillText "Power Up!", 130, 230
+
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'right'
+    @context.fillText "Germ Freeze", 130, 250
+
+    @context.drawImage @resource['img/freeze.png'], 0, 0, 10 , 10, 140, 240, 10, 10
+
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'right'
+    @context.fillText "Shield", 130, 270
+
+    @context.drawImage @resource['img/shield.png'], 0, 0, 10 , 10, 140, 260, 10, 10
+
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'right'
+    @context.fillText "Health", 130, 290
+
+    @context.drawImage @resource['img/vitamin.png'], 0, 0, 10 , 10, 140, 280, 10, 10
+
+    @context.font = 'bold 12px sans-serif'
+    @context.textAlign = 'left'
+    @context.fillText "Left and Right arrow keys move.", 250, 100
+    @context.fillText "Press Up to fire attack. Press down to fire absorb ray.", 250, 120
+
+    @context.fillText "Hit power-ups with absorb rays to use them.", 250, 150
+    @context.fillText "Destory the germs, don't hit them with your absorb ray!", 250, 170
+
+    @context.fillText "Super germs cause more sickness.", 250, 200
+    @context.fillText "Germs that get passed you will cause you to get sick.", 250, 220
+
+    @context.font = 'bold 16px sans-serif'
+    @context.textAlign = 'left'
+    @context.fillText "Press Start to play!", 250, 280
 
   showPauseScreen: ->
     @context.fillStyle = 'rgba(0,0,0,.7)'
