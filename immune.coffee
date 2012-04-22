@@ -41,7 +41,7 @@ class Immune
     audioCount = 0
 
     images = [ 'img/germ.png' ];
-    audios = [];
+    audios = [ 'sfx/shoot.ogg', 'sfx/explode.ogg', 'sfx/damage.ogg', 'sfx/absorb.ogg', 'sfx/powerup.ogg' ];
 
     finished = false;
 
@@ -116,11 +116,11 @@ class Immune
     @resetCanvas()
 
     damage = @drawGerms(@bullets, @activePowerUps, @resource)
-    @drawPowerUps(@bullets)
+    @drawPowerUps(@bullets, @resource)
     @drawActivePowerUps(@bullets)
 
     @drawBullets()
-    @defender.move(@canvas, @key, @bullets)
+    @defender.move(@canvas, @key, @bullets, @resource)
     @defender.draw(@context)
 
     if !@status.freeze
@@ -134,6 +134,7 @@ class Immune
     else if damage
       @context.fillStyle = 'red'
       @context.fillRect 0, 0, @canvas.width, @canvas.height
+      @resource['sfx/damage.ogg'].play()
 
   gameOver: ->
     @over = true
@@ -203,12 +204,13 @@ class Immune
           else
             germ.health--
             @status.score++
-
+            if germ.health < 1
+              resource['sfx/explode.ogg'].play()
           toCleanUp.push germIndex if germ.health < 1
-
         else if powerUpHit.hit
           toCleanUp.push germIndex
           powerUpHit.item.takeDamage(germ.damage)
+          resource['sfx/explode.ogg'].play()
         else if germ.isOffscreen(@canvas)
           @status.sickness = @status.sickness + germ.damage
           damage = true
@@ -219,7 +221,7 @@ class Immune
 
     return damage
 
-  drawPowerUps: (bullets) ->
+  drawPowerUps: (bullets, resource) ->
     toCleanUp = [];
 
     if @powerups.length > 0
@@ -232,7 +234,7 @@ class Immune
         if powerupHit.hit
           toCleanUp.push powerupIndex
           if powerupHit.absorb
-            powerup.activate(@canvas, @status)
+            powerup.activate(@canvas, @status, resource)
             @activePowerUps.push powerup
         else if powerup.isOffscreen(@canvas)
           toCleanUp.push powerupIndex
@@ -370,7 +372,8 @@ class PowerUp extends Germ
     clearTimeout @freezeTimeout
     @health = 0
 
-  activate: (canvas, status) ->
+  activate: (canvas, status, resource) ->
+    resource['sfx/powerup.ogg'].play()
     if @type == 'freeze'
       status.freeze = true
 
@@ -413,26 +416,28 @@ class Defender
     context.fillStyle = 'red'
     context.fillRect @x + @width / 4, @y - @height / 2, @width / 2, @height / 2
 
-  move: (canvas, key, bullets) ->
+  move: (canvas, key, bullets, resource) ->
     if key.isDown(key.codes.LEFT) and @x - @speed >= 0
       @x = @x - @speed
     if key.isDown(key.codes.RIGHT) and @x + @speed <= canvas.width - @width
       @x = @x + @speed
     if key.isDown(key.codes.UP)
-      @fire(bullets)
+      @fire(bullets, resource)
     if key.isDown(key.codes.DOWN)
-      @absorb(bullets)
+      @absorb(bullets, resource)
 
-  fire: (bullets) ->
+  fire: (bullets, resource) ->
     return if @cooldown
+    resource['sfx/shoot.ogg'].play()
     bullets.push(new Bullet @x + @width / 2, @y)
     @cooldown = true
     setTimeout =>
       @cooldown = false
     , 100
 
-  absorb: (bullets) ->
+  absorb: (bullets, resource) ->
     return if @cooldown
+    resource['sfx/absorb.ogg'].play()
     bullets.push(new AbsorbBullet @x + @width / 2, @y)
     @cooldown = true
     setTimeout =>
