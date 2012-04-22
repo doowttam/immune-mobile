@@ -48,7 +48,7 @@ class Immune
     ]
     audios = [
       'sfx/shoot.ogg', 'sfx/explode.ogg', 'sfx/damage.ogg',
-      'sfx/absorb.ogg', 'sfx/powerup.ogg'
+      'sfx/absorb.ogg', 'sfx/powerup.ogg', 'bg.ogg'
     ]
 
     finished = false;
@@ -387,6 +387,10 @@ class Immune
     if @over
       location.reload()
     else
+      @resource['bg.ogg'].addEventListener 'ended', =>
+        @resource['bg.ogg'].play()
+      @resource['bg.ogg'].play()
+
       @frameInterval =
         setInterval =>
           @drawFrame()
