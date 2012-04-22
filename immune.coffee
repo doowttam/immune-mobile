@@ -40,7 +40,7 @@ class Immune
     imageCount = 0
     audioCount = 0
 
-    images = [ 'img/germ.png' ];
+    images = [ 'img/germ.png', 'img/bg.png', 'img/vitamin.png', 'img/shield.png', 'img/freeze.png' ];
     audios = [ 'sfx/shoot.ogg', 'sfx/explode.ogg', 'sfx/damage.ogg', 'sfx/absorb.ogg', 'sfx/powerup.ogg' ];
 
     finished = false;
@@ -115,6 +115,8 @@ class Immune
   drawFrame: ->
     @resetCanvas()
 
+    @context.drawImage @resource['img/bg.png'], 0, 0
+
     damage = @drawGerms(@bullets, @activePowerUps, @resource)
     @drawPowerUps(@bullets, @resource)
     @drawActivePowerUps(@bullets)
@@ -126,6 +128,11 @@ class Immune
     if !@status.freeze
       @spawnGerms()
       @spawnPowerUps()
+    else
+      @context.fillStyle = 'purple'
+      @context.font = 'bold 12px sans-serif'
+      @context.textAlign = 'left'
+      @context.fillText 'GERM FREEZE', 80, 42
 
     @drawStatus()
 
@@ -183,9 +190,9 @@ class Immune
     if Math.random() < 0.005
       randX = Math.ceil (Math.random() * (@canvas.width - 100)) + 50
       spawnType = Math.random()
-      if spawnType < 0.4
+      if spawnType < 0
         @powerups.push( new FreezeBomb randX, 0 );
-      else if spawnType < 0.7
+      else if spawnType < 0
         @powerups.push( new Shield randX, 0 );
       else
         @powerups.push( new Vitamin randX, 0 );
@@ -234,7 +241,7 @@ class Immune
       for powerupIndex in [ 0 .. @powerups.length - 1 ]
         powerup = @powerups[powerupIndex]
         powerup.move(@context)
-        powerup.draw(@context)
+        powerup.draw(@context, resource)
 
         powerupHit = powerup.isHit(bullets)
         if powerupHit.hit
@@ -254,7 +261,7 @@ class Immune
     if @activePowerUps.length > 0
       for powerUpIndex in [ 0 .. @activePowerUps.length - 1 ]
         powerup = @activePowerUps[powerUpIndex]
-        powerup.draw @context
+        powerup.draw @context, @resource
         if powerup.health < 1
           toCleanUp.push powerUpIndex
 
@@ -383,6 +390,10 @@ class Shield extends PowerUp
     @x = 0
     @health = 60
 
+  draw: (context, resource)->
+    offset = if @frame <= 4 then 1 else 0
+    context.drawImage resource['img/shield.png'], 10 * offset, 0, 10 , 10, @x, @y, @width, @height
+
 class Vitamin extends PowerUp
   color: 'red'
   healing: 10
@@ -392,6 +403,10 @@ class Vitamin extends PowerUp
     if status.sickness > @healing
       status.sickness = status.sickness - @healing
     @health = 0
+
+  draw: (context, resource)->
+    offset = if @frame <= 4 then 1 else 0
+    context.drawImage resource['img/vitamin.png'], 10 * offset, 0, 10 , 10, @x, @y, @width, @height
 
 class FreezeBomb extends PowerUp
   freezeTimeout: null
@@ -415,6 +430,12 @@ class FreezeBomb extends PowerUp
         status.activeFreezePowerUp = null
         @health = 0
       , 3000
+
+  draw: (context, resource)->
+    if @freezeTimeout
+      context.drawImage resource['img/freeze.png'], 10, 0, 10 , 10, @x, @y, @width, @height
+    else
+      context.drawImage resource['img/freeze.png'], 0, 0, 10 , 10, @x, @y, @width, @height
 
 class Defender
   constructor: (@x, @y) ->
