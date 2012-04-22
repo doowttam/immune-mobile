@@ -154,12 +154,17 @@ class Immune
     @context.fillStyle = 'white'
     @context.font = 'bold 48px sans-serif'
     @context.textAlign = 'center'
-    @context.fillText "You got sick!", @canvas.width / 2, 125
+    @context.fillText "Oh no! Now you're sick!", @canvas.width / 2, 125
 
     @context.fillStyle = 'white'
     @context.font = 'bold 36px sans-serif'
     @context.textAlign = 'center'
     @context.fillText "Score: " + @status.score, @canvas.width / 2, 200
+
+    @context.fillStyle = 'white'
+    @context.font = 'bold 24px sans-serif'
+    @context.textAlign = 'center'
+    @context.fillText "(Hope you feel better.)", @canvas.width / 2, 250
 
   drawStatus: ->
     @context.fillStyle = 'rgba(0,0,0,.5)'
