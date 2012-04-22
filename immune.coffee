@@ -182,7 +182,10 @@ class Immune
   spawnPowerUps: ->
     if Math.random() < 0.005
       randX = Math.ceil Math.random() * @canvas.width
-      @powerups.push( new PowerUp randX, 0 );
+      if Math.random() < 0.5
+        @powerups.push( new FreezeBomb randX, 0 );
+      else
+        @powerups.push( new Shield randX, 0 );
 
   drawGerms: (bullets, powerups, resource) ->
     toCleanUp = [];
@@ -353,7 +356,6 @@ class GiantGerm extends Germ
       healthWidth = @width * @health / @baseHealth
       context.fillRect @x, @y, healthWidth, 5
 
-
 class PowerUp extends Germ
   constructor: (@x, @y) ->
     @speed = 1
@@ -361,12 +363,26 @@ class PowerUp extends Germ
     @height = 10
     @damage = 20
 
-    if Math.random() < 0.5
-      @type = 'freeze'
-    else
-      @type = 'shield'
+  takeDamage: (damage) ->
+    @health = @health - damage
+    @height = @height - 2
 
+  draw: (context) ->
+    context.fillStyle = @color
+    context.fillRect @x, @y, @width, @height
+
+class Shield extends PowerUp
+  color: 'blue'
+
+  activate: (canvas, status, resource) ->
+    resource['sfx/powerup.ogg'].play()
+    @width = canvas.width
+    @x = 0
+    @health = 60
+
+class FreezeBomb extends PowerUp
   freezeTimeout: null
+  color: 'purple'
 
   cancelFreeze: ->
     clearTimeout @freezeTimeout
@@ -374,34 +390,18 @@ class PowerUp extends Germ
 
   activate: (canvas, status, resource) ->
     resource['sfx/powerup.ogg'].play()
-    if @type == 'freeze'
-      status.freeze = true
+    status.freeze = true
 
-      if status.activeFreezePowerUp
-        status.activeFreezePowerUp.cancelFreeze()
+    if status.activeFreezePowerUp
+      status.activeFreezePowerUp.cancelFreeze()
 
-      status.activeFreezePowerUp = @
-      @freezeTimeout =
-        setTimeout =>
-          status.freeze = false
-          status.activeFreezePowerUp = null
-          @health = 0
-        , 3000
-    else
-      @width = canvas.width
-      @x = 0
-      @health = 60
-
-  takeDamage: (damage) ->
-    @health = @health - damage
-    @height = @height - 2
-
-  draw: (context) ->
-    if @type == 'shield'
-      context.fillStyle = 'blue'
-    else
-      context.fillStyle = 'purple'
-    context.fillRect @x, @y, @width, @height
+    status.activeFreezePowerUp = @
+    @freezeTimeout =
+      setTimeout =>
+        status.freeze = false
+        status.activeFreezePowerUp = null
+        @health = 0
+      , 3000
 
 class Defender
   constructor: (@x, @y) ->
