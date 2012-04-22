@@ -249,7 +249,7 @@ class Immune
         bullet = @bullets[bulletIndex]
         bullet.move(@context)
         bullet.draw(@context)
-        if bullet.isOffscreen()
+        if bullet.usedUp()
           toCleanUp.push bulletIndex
 
       for bulletIndex in toCleanUp
@@ -314,6 +314,7 @@ class Germ
            @x + @width >= item.x and
            @y <= item.y + item.height and
            @y + @height >= item.y )
+        item.hitSomething = true
         return { hit: true, absorb: item.absorb, item: item }
     return { hit: false }
 
@@ -415,6 +416,7 @@ class Bullet
     @speed = 3
     @width = 4
     @height = 4
+    @hitSomething = false
 
   draw: (context)->
     context.fillStyle = 'black'
@@ -422,6 +424,9 @@ class Bullet
 
   move: ->
     @y = @y - @speed;
+
+  usedUp: ->
+    if @isOffscreen() or @hitSomething then true else false
 
   isOffscreen: -> if @y < 0 then true else false
 
