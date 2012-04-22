@@ -106,11 +106,11 @@ class Immune
   drawFrame: ->
     @resetCanvas()
 
-    @drawBullets()
-    damage = @drawGerms(@bullets, @activePowerUps)
+    damage = @drawGerms(@bullets, @activePowerUps, @resource)
     @drawPowerUps(@bullets)
     @drawActivePowerUps(@bullets)
 
+    @drawBullets()
     @defender.move(@canvas, @key, @bullets)
     @defender.draw(@context)
 
@@ -171,7 +171,7 @@ class Immune
       randX = Math.ceil Math.random() * @canvas.width
       @powerups.push( new PowerUp randX, 0 );
 
-  drawGerms: (bullets, powerups) ->
+  drawGerms: (bullets, powerups, resource) ->
     toCleanUp = [];
     damage    = false
 
@@ -179,7 +179,7 @@ class Immune
       for germIndex in [ 0 .. @germs.length - 1 ]
         germ = @germs[germIndex]
         germ.move(@context) if !@status.freeze
-        germ.draw(@context)
+        germ.draw(@context, resource)
 
         bulletHit  = germ.isHit(bullets)
         powerUpHit = germ.isHit(powerups)
@@ -291,18 +291,20 @@ class Key
 
 class Germ
   constructor: (@x, @y) ->
-    @speed = 1
-    @width = 10
+    @speed  = 1
+    @width  = 10
     @height = 10
     @damage = 20
     @health = 1
+    @frame  = 0
 
-  draw: (context)->
-    context.fillStyle = 'green'
-    context.fillRect @x, @y, @width, @height
+  draw: (context, resource)->
+    offset = if @frame <= 4 then 1 else 0
+    context.drawImage resource['img/germ.png'], 20 * offset, 0, 20 , 20, @x, @y, @width, @height
 
   move: ->
     @y = @y + @speed;
+    if @frame < 9 then @frame++ else @frame = 0;
 
   isOffscreen: (canvas) -> if @y > canvas.height then true else false
 
@@ -423,5 +425,3 @@ class AbsorbBullet extends Bullet
 
 window.onload = ->
   immune = new Immune window.document, window
-  #immune.drawFrame()
-  #immune.play()
