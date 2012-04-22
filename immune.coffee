@@ -12,13 +12,14 @@ class Immune
     @powerups       = []
     @activePowerUps = []
 
+    @resource = {}
+
     # Status
     @status =
       sickness: 0
       score   : 0
       freeze: false
       activeFreezePowerUp: null
-
 
     @buttons.start.onclick = @play
     @buttons.pause.onclick = @pause
@@ -31,8 +32,76 @@ class Immune
 
     @defender = new Defender( @canvas.width / 2, @canvas.height - 50 )
 
+    @loadResources =>
+        @buttons.start.disabled = false
+        @showTitleScreen()
+
+  loadResources: ( playCallback ) ->
+    imageCount = 0
+    audioCount = 0
+
+    images = [ 'img/germ.png' ];
+    audios = [];
+
+    finished = false;
+
+    @loading( imageCount + audioCount, images.length + audios.length );
+
+    # Just in case things take too long
+    setTimeout ->
+      if !finished
+        playCallback();
+        finished = true
+    , 4000
+
+    resourceOnLoad = (type) =>
+      if type == 'image'
+        imageCount++
+      if type == 'audio'
+        audioCount++
+
+      @loading( imageCount + audioCount, images.length + audios.length );
+
+      if imageCount == images.length and audioCount == audios.length
+        if !finished
+          playCallback()
+        finished = true
+
+    for imageName in images
+      img = new Image()
+      img.src = imageName
+      img.addEventListener 'load', -> resourceOnLoad('image')
+      @resource[imageName] = img
+
+    for audioName in audios
+      sound = new Audio()
+      sound.src = audioName
+      sound.addEventListener 'canplaythrough', -> resourceOnLoad('audio')
+      @resource[audioName] = sound
+
   resetCanvas: ->
     @canvas.width = @canvas.width
+
+  loading: (cur, total) ->
+    @resetCanvas();
+
+    msg = "Loading (#{cur}/#{total})..."
+
+    @context.font = "bold 12px sans-serif"
+
+    @context.textAlign = "center"
+    @context.textBaseline = "middle"
+    @context.fillText msg, @canvas.width - @canvas.width / 2, @canvas.height - @canvas.height / 2
+
+  showTitleScreen: ->
+    @resetCanvas();
+    @context.fillStyle = 'rgba(0,0,0,.7)'
+    @context.fillRect 0, 0, @canvas.width, @canvas.height
+
+    @context.fillStyle = 'black'
+    @context.font = 'bold 48px sans-serif'
+    @context.textAlign = 'center'
+    @context.fillText "Immune", @canvas.width / 2, 125
 
   drawFrame: ->
     @resetCanvas()
@@ -354,5 +423,5 @@ class AbsorbBullet extends Bullet
 
 window.onload = ->
   immune = new Immune window.document, window
-  immune.drawFrame()
-  immune.play()
+  #immune.drawFrame()
+  #immune.play()
