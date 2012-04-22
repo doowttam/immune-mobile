@@ -53,7 +53,7 @@ class Immune
 
     finished = false;
 
-    @loading( imageCount + audioCount, images.length + audios.length );
+    @loading imageCount + audioCount, images.length + audios.length
 
     # Just in case things take too long
     setTimeout ->
@@ -63,6 +63,9 @@ class Immune
     , 10000
 
     resourceOnLoad = (type) =>
+      # firefox calls onload over and over again, even once things are loaded
+      return if finished
+
       if type == 'image'
         imageCount++
       if type == 'audio'
