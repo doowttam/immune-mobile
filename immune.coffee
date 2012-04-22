@@ -40,8 +40,15 @@ class Immune
     imageCount = 0
     audioCount = 0
 
-    images = [ 'img/germ.png', 'img/bg.png', 'img/vitamin.png', 'img/shield.png', 'img/freeze.png', 'img/defender.png' ];
-    audios = [ 'sfx/shoot.ogg', 'sfx/explode.ogg', 'sfx/damage.ogg', 'sfx/absorb.ogg', 'sfx/powerup.ogg' ];
+    images = [
+      'img/germ.png',   'img/bg.png',     'img/vitamin.png',
+      'img/shield.png', 'img/freeze.png', 'img/defender.png',
+      'img/giant_germ.png'
+    ]
+    audios = [
+      'sfx/shoot.ogg', 'sfx/explode.ogg', 'sfx/damage.ogg',
+      'sfx/absorb.ogg', 'sfx/powerup.ogg'
+    ]
 
     finished = false;
 
@@ -195,9 +202,9 @@ class Immune
     if Math.random() < 0.005
       randX = Math.ceil (Math.random() * (@canvas.width - 100)) + 50
       spawnType = Math.random()
-      if spawnType < 0
+      if spawnType < 0.4
         @powerups.push( new FreezeBomb randX, 0 );
-      else if spawnType < 0
+      else if spawnType < 0.7
         @powerups.push( new Shield randX, 0 );
       else
         @powerups.push( new Vitamin randX, 0 );
@@ -337,7 +344,7 @@ class Germ
 
   draw: (context, resource)->
     offset = if @frame <= 4 then 1 else 0
-    context.drawImage resource['img/germ.png'], 20 * offset, 0, 20 , 20, @x, @y, @width, @height
+    context.drawImage resource['img/germ.png'], 10 * offset, 0, 10 , 10, @x, @y, @width, @height
 
   move: ->
     @y = @y + @speed;
@@ -365,7 +372,7 @@ class GiantGerm extends Germ
 
   draw: (context, resource)->
     offset = if @frame <= 4 then 1 else 0
-    context.drawImage resource['img/germ.png'], 20 * offset, 0, 20 , 20, @x, @y, @width, @height
+    context.drawImage resource['img/giant_germ.png'], 20 * offset, 0, 20 , 20, @x, @y, @width, @height
     context.fillStyle = 'red'
     if @health < @baseHealth
       healthWidth = @width * @health / @baseHealth
