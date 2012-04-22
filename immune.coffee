@@ -103,6 +103,15 @@ class Immune
     @context.textAlign = 'center'
     @context.fillText "Immune", @canvas.width / 2, 125
 
+  showPauseScreen: ->
+    @context.fillStyle = 'rgba(0,0,0,.7)'
+    @context.fillRect 0, 0, @canvas.width, @canvas.height
+
+    @context.fillStyle = 'white'
+    @context.font = 'bold 48px sans-serif'
+    @context.textAlign = 'center'
+    @context.fillText "Paused", @canvas.width / 2, 125
+
   drawFrame: ->
     @resetCanvas()
 
@@ -127,7 +136,10 @@ class Immune
       @context.fillRect 0, 0, @canvas.width, @canvas.height
 
   gameOver: ->
-    @pause()
+    @over = true
+    clearInterval @frameInterval
+    @frameInterval = null
+
     @context.fillStyle = 'rgba(0,0,0,.7)'
     @context.fillRect 0, 0, @canvas.width, @canvas.height
 
@@ -257,15 +269,20 @@ class Immune
 
   play: =>
     return if @frameInterval
-    @frameInterval =
-      setInterval =>
-        @drawFrame()
-      , 20
+
+    if @over
+      location.reload()
+    else
+      @frameInterval =
+        setInterval =>
+          @drawFrame()
+        , 20
 
   pause: =>
     if @frameInterval
       clearInterval @frameInterval
       @frameInterval = null
+      @showPauseScreen()
     else
       @play()
 
