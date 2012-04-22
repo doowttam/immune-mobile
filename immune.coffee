@@ -180,7 +180,7 @@ class Immune
     @context.font = 'bold 12px sans-serif'
     @context.textAlign = 'left'
     @context.fillText "Left and Right arrow keys move.", 250, 100
-    @context.fillText "Press Up to fire attack. Press down to fire absorb ray.", 250, 120
+    @context.fillText "Press Up to fire attack. Press Down to fire absorb ray.", 250, 120
 
     @context.fillText "Hit power-ups with absorb rays to use them.", 250, 150
     @context.fillText "Destory the germs, don't hit them with your absorb ray!", 250, 170
@@ -275,7 +275,7 @@ class Immune
   spawnGerms: ->
     if Math.random() < 0.01
       randX = Math.ceil (Math.random() * (@canvas.width - 100)) + 50
-      if Math.random() < 0.7
+      if Math.random() < 0.9
         @germs.push( new Germ randX, 0 );
       else
         @germs.push( new GiantGerm randX, 0 );
@@ -422,7 +422,7 @@ class Germ
     @speed  = 1
     @width  = 10
     @height = 10
-    @damage = 20
+    @damage = 5
     @health = @baseHealth = 1
     @frame  = 0
 
@@ -451,7 +451,7 @@ class GiantGerm extends Germ
     @speed = 0.5
     @width = 20
     @height = 20
-    @damage = 60
+    @damage = 30
     @health = @baseHealth = 15
 
   draw: (context, resource)->
@@ -496,8 +496,10 @@ class Vitamin extends PowerUp
 
   activate: (canvas, status, resource) ->
     resource['sfx/powerup.ogg'].play()
-    if status.sickness > @healing
+    if status.sickness - @healing > 0
       status.sickness = status.sickness - @healing
+    else
+      status.sickness = 0
     @health = 0
 
   draw: (context, resource)->
