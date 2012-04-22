@@ -40,7 +40,7 @@ class Immune
     imageCount = 0
     audioCount = 0
 
-    images = [ 'img/germ.png', 'img/bg.png', 'img/vitamin.png', 'img/shield.png', 'img/freeze.png' ];
+    images = [ 'img/germ.png', 'img/bg.png', 'img/vitamin.png', 'img/shield.png', 'img/freeze.png', 'img/defender.png' ];
     audios = [ 'sfx/shoot.ogg', 'sfx/explode.ogg', 'sfx/damage.ogg', 'sfx/absorb.ogg', 'sfx/powerup.ogg' ];
 
     finished = false;
@@ -52,7 +52,7 @@ class Immune
       if !finished
         playCallback();
         finished = true
-    , 4000
+    , 10000
 
     resourceOnLoad = (type) =>
       if type == 'image'
@@ -123,7 +123,7 @@ class Immune
 
     @drawBullets()
     @defender.move(@canvas, @key, @bullets, @resource)
-    @defender.draw(@context)
+    @defender.draw(@context, @resource)
 
     if !@status.freeze
       @spawnGerms()
@@ -441,14 +441,11 @@ class Defender
   constructor: (@x, @y) ->
     @speed  = 2
     @width  = 24
-    @height = 10
+    @height = 15
     @cooldown = false
 
-  draw: (context)->
-    context.fillStyle = 'black'
-    context.fillRect @x, @y, @width, @height
-    context.fillStyle = 'red'
-    context.fillRect @x + @width / 4, @y - @height / 2, @width / 2, @height / 2
+  draw: (context, resource)->
+    context.drawImage resource['img/defender.png'], @x, @y
 
   move: (canvas, key, bullets, resource) ->
     if key.isDown(key.codes.LEFT) and @x - @speed >= 0
