@@ -2,9 +2,13 @@ class Immune
   constructor: (@doc, @win) ->
     @canvas  = @doc.getElementById("game_canvas")
     @context = @canvas.getContext("2d")
-    @buttons =
-      start: @doc.getElementById("start")
-      pause: @doc.getElementById("pause")
+
+    @canvas.width  = @win.innerWidth;
+    @canvas.height = @win.innerHeight;
+
+    # @buttons =
+    #   start: @doc.getElementById("start")
+    #   pause: @doc.getElementById("pause")
 
     # Entities
     @bullets        = []
@@ -22,8 +26,8 @@ class Immune
       activeFreezePowerUp: null
       frame: 0
 
-    @buttons.start.onclick = @play
-    @buttons.pause.onclick = @pause
+    # @buttons.start.onclick = @play
+    # @buttons.pause.onclick = @pause
 
     @key = new Key
     @win.onkeyup = (e) =>
@@ -34,7 +38,7 @@ class Immune
     @defender = new Defender( @canvas.width / 2, @canvas.height - 50 )
 
     @loadResources =>
-        @buttons.start.disabled = false
+        # @buttons.start.disabled = false
         @showTitleScreen()
 
   loadResources: ( playCallback ) ->
@@ -611,3 +615,4 @@ class AbsorbBullet extends Bullet
 
 window.onload = ->
   immune = new Immune window.document, window
+  console.log window
