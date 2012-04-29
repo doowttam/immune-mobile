@@ -6,9 +6,42 @@ class Immune
     @canvas.width  = @win.innerWidth;
     @canvas.height = @win.innerHeight;
 
-    # @buttons =
-    #   start: @doc.getElementById("start")
-    #   pause: @doc.getElementById("pause")
+    @readyToPlay = false;
+
+    @doc.body.addEventListener 'touchmove', (event) =>
+        event.preventDefault()
+      , false
+
+    onScreenButtons =
+      LEFT:
+        x: 50
+        y: @canvas.height - 100
+        size: 50
+      RIGHT:
+        x: 125
+        y: @canvas.height - 100
+        size: 50
+      DOWN:
+        x: @canvas.width - 100
+        y: @canvas.height - 100
+        size: 50
+      UP:
+        x: @canvas.width - 100
+        y: @canvas.height - 175
+        size: 50
+
+    @controls = new Controls onScreenButtons
+
+    @canvas.addEventListener 'touchstart', @controls.touchStart
+    @canvas.addEventListener 'touchmove',  @controls.touchMove
+    @canvas.addEventListener 'touchend',  @controls.touchEnd
+
+    @canvas.addEventListener 'touchstart', (event) =>
+      return if !@readyToPlay
+      return if @frameInterval
+      @play()
+
+    @canvas.addEventListener
 
     # Entities
     @bullets        = []
@@ -26,9 +59,6 @@ class Immune
       activeFreezePowerUp: null
       frame: 0
 
-    # @buttons.start.onclick = @play
-    # @buttons.pause.onclick = @pause
-
     @key = new Key
     @win.onkeyup = (e) =>
       @key.onKeyUp e
@@ -38,8 +68,8 @@ class Immune
     @defender = new Defender( @canvas.width / 2, @canvas.height - 50 )
 
     @loadResources =>
-        # @buttons.start.disabled = false
         @showTitleScreen()
+        @readyToPlay = true
 
   loadResources: ( playCallback ) ->
     imageCount = 0
@@ -221,7 +251,7 @@ class Immune
     @drawActivePowerUps(@bullets)
 
     @drawBullets()
-    @defender.move(@canvas, @key, @bullets, @resource)
+    @defender.move(@canvas, @controls.buttons, @bullets, @resource)
     @defender.draw(@context, @resource)
 
     if !@status.freeze
@@ -235,12 +265,21 @@ class Immune
 
     @drawStatus()
 
+    @drawControls(@controls.buttons)
+
     if @status.sickness > 99
       @gameOver()
     else if damage
       @context.fillStyle = 'red'
       @context.fillRect 0, 0, @canvas.width, @canvas.height
       @resource['sfx/damage.ogg'].play()
+
+  drawControls: (controls) ->
+    @context.fillStyle = 'black'
+    @context.fillRect controls.UP.x, controls.UP.y, controls.UP.size, controls.UP.size
+    @context.fillRect controls.DOWN.x, controls.DOWN.y, controls.DOWN.size, controls.DOWN.size
+    @context.fillRect controls.LEFT.x, controls.LEFT.y, controls.LEFT.size, controls.LEFT.size
+    @context.fillRect controls.RIGHT.x, controls.RIGHT.y, controls.RIGHT.size, controls.RIGHT.size
 
   gameOver: ->
     @over = true
@@ -559,14 +598,14 @@ class Defender
   draw: (context, resource)->
     context.drawImage resource['img/defender.png'], @x, @y
 
-  move: (canvas, key, bullets, resource) ->
-    if key.isDown(key.codes.LEFT) and @x - @speed >= 0
+  move: (canvas, buttons, bullets, resource) ->
+    if buttons.LEFT.pressed and @x - @speed >= 0
       @x = @x - @speed
-    if key.isDown(key.codes.RIGHT) and @x + @speed <= canvas.width - @width
+    if buttons.RIGHT.pressed and @x + @speed <= canvas.width - @width
       @x = @x + @speed
-    if key.isDown(key.codes.UP)
+    if buttons.UP.pressed
       @fire(bullets, resource)
-    if key.isDown(key.codes.DOWN)
+    if buttons.DOWN.pressed
       @absorb(bullets, resource)
 
   fire: (bullets, resource) ->
@@ -613,6 +652,37 @@ class AbsorbBullet extends Bullet
     context.fillStyle = 'orange'
     context.fillRect @x - @width / 2, @y, @width, @height
 
+class Controls
+  constructor: (@buttons) ->
+    for type, button of @buttons
+      @buttons[type].pressed = false
+
+  touchStart: (event) =>
+    @checkTouches event, (button, touch) =>
+      button.pressed = @checkPressed button.x, button.y, button.size, touch.pageX, touch.pageY
+
+  touchMove: (event) =>
+    @checkTouches event, (button, touch) =>
+      button.pressed = @checkPressed button.x, button.y, button.size, touch.pageX, touch.pageY
+
+  touchEnd: (event) =>
+    @checkTouches event, (button, touch) =>
+      pressed = @checkPressed button.x, button.y, button.size, touch.pageX, touch.pageY
+      button.pressed = if pressed then false else button.pressed
+
+  checkTouches: (event, check) ->
+    for type, button of @buttons
+      for touch in event.changedTouches
+        check button, touch
+
+  checkPressed: (buttonX, buttonY, buttonSize, touchX, touchY) ->
+    if touchX >= buttonX and
+       touchX <= buttonX + buttonSize and
+       touchY >= buttonY and
+       touchY <= buttonY + buttonSize
+      true
+    else
+      false
+
 window.onload = ->
   immune = new Immune window.document, window
-  console.log window
